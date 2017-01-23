@@ -16,7 +16,7 @@
 
 BOARD_VENDOR := lge
 
-COMMON_PATH := device/lge/g5-common
+COMMON_PATH := device/lge/msm8996-common
 
 TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 
@@ -134,9 +134,6 @@ USE_DEVICE_SPECIFIC_GPS := true
 # Init
 TARGET_PLATFORM_DEVICE_BASE := /devices/soc/
 
-# Lights
-TARGET_PROVIDES_LIBLIGHT := true
-
 # Media
 TARGET_USES_MEDIA_EXTENSIONS := true
 
@@ -196,5 +193,3 @@ WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/bcmdhd/parameters/firmware_path"
 WIFI_DRIVER_FW_PATH_AP      := "/system/etc/firmware/fw_bcmdhd_apsta.bin"
 WIFI_DRIVER_FW_PATH_STA     := "/system/etc/firmware/fw_bcmdhd.bin"
 
-# inherit from the proprietary version
--include vendor/lge/g5-common/BoardConfigVendor.mk
