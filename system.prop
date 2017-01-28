@@ -61,7 +61,7 @@ dalvik.vm.heapsize=60m
 # Display
 ro.qualcomm.cabl=0
 ro.sf.lcd_density=640
-ro.config.size_override=1440,2560
+#ro.config.size_override=1440,2560
 
 # Factory Reset Protection (FRP)
 ro.frp.pst=/dev/block/bootdevice/by-name/persistent
