@@ -69,8 +69,8 @@ persist.audio.fluence.voicerec=false
 persist.audio.fluence.speaker=true
 
 # GMS
-# Device was launched with M
-ro.product.first_api_level=23
+# Device was launched with N
+ro.product.first_api_level=24
 
 # GPS
 persist.gps.qc_nlp_in_use=1
@@ -146,3 +146,5 @@ persist.timed.enable=true
 
 # WiFi
 wifi.interface=wlan0
+# Other
+ro.factorytest=0
