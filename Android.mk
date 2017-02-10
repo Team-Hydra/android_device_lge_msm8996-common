@@ -14,11 +14,10 @@
 # limitations under the License.
 #
 
-ifneq ($(filter v20 h918 h910 vs995 us996 ls997,$(TARGET_DEVICE)),)
-
 LOCAL_PATH := $(call my-dir)
 
-include $(call all-makefiles-under,$(LOCAL_PATH))
+ifeq ($(BOARD_VENDOR),lge)
+include $(call all-subdir-makefiles,$(LOCAL_PATH))
 
 # CPPF Images
 CPPF_IMAGES := \
@@ -95,6 +94,6 @@ $(WIDEVINE_SYMLINKS): $(LOCAL_INSTALLED_MODULE)
 ALL_DEFAULT_INSTALLED_MODULES += $(WIDEVINE_SYMLINKS)
 # END WIDEVINE Images
 
-include device/lge/v20-common/tftp.mk
+include device/lge/msm8996-common/tftp.mk
 
 endif
