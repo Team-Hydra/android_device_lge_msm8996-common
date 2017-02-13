@@ -255,9 +255,6 @@
          The default is false. -->
     <bool name="config_suspendWhenScreenOffDueToProximity">true</bool>
 
-    <!-- Is the device capable of hot swapping an ICC Card -->
-    <bool name="config_hotswapCapable">true</bool>
-
     <!-- Flag specifying whether VoLTE & VT is available on device -->
     <bool name="config_device_volte_available">true</bool>
 
@@ -312,16 +309,14 @@
     <string name="config_dozeComponent">com.android.systemui/com.android.systemui.doze.DozeService</string>
 
     <string-array name="config_mobile_tcp_buffers">
-        <item>lte:2097152,4194304,8388608,262144,524288,1048576</item>
-        <item>lte_ca:2097152,4194304,8388608,4096,1048576,2097152</item>
-        <item>umts:4094,87380,1220608,4096,16384,1220608</item>
-        <item>hspa:4094,87380,1220608,4096,16384,1220608</item>
-        <item>hsupa:4094,87380,1220608,4096,16384,1220608</item>
-        <item>hsdpa:4094,87380,1220608,4096,16384,1220608</item>
-        <item>hspap:4094,87380,1220608,4096,16384,1220608</item>
-        <item>edge:4093,26280,35040,4096,16384,35040</item>
-        <item>gprs:4092,8760,11680,4096,8760,11680</item>
-        <item>evdo:4094,87380,524288,4096,16384,262144</item>
+        <item>edge:4093,26280,704512,4096,16384,110208</item>
+        <item>gprs:4092,8760,704512,4096,8760,110208</item>
+        <item>umts:4094,87380,704512,4096,16384,110208</item>
+        <item>hsdpa:4092,87380,704512,4096,16384,110208</item>
+        <item>hsupa:4092,87380,704512,4096,16384,110208</item>
+        <item>hspa:4092,87380,704512,4096,16384,110208</item>
+        <item>hspap:4092,87380,704512,4096,16384,110208</item>
+        <item>lte:4094,87380,2560000,4096,16384,1220608</item>
     </string-array>
 
     <!-- Configure wifi tcp buffersizes in the form:
