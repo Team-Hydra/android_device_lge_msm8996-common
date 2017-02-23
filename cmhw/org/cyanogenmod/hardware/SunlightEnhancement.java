@@ -18,50 +18,48 @@ package org.cyanogenmod.hardware;
 
 import org.cyanogenmod.internal.util.FileUtils;
 
-import android.util.Log;
+import android.os.SystemProperties;
 
-/**
- * Facemelt mode!
- */
 public class SunlightEnhancement {
 
-    private static final String TAG = "SunlightEnhancement";
-
-    private static final String FILE_HBM = "/sys/class/graphics/fb0/hbm";
+    private static String FILE_HLM = "/sys/class/graphics/fb0/hl_mode";
 
     /**
-     * Whether device supports HBM
+     * Whether device supports HLM
      *
      * @return boolean Supported devices must return always true
      */
     public static boolean isSupported() {
-        return FileUtils.isFileWritable(FILE_HBM);
+        return FileUtils.isFileWritable(FILE_HLM);
     }
 
     /**
-     * This method return the current activation status of HBM
+     * This method return the current activation status of HLM
      *
      * @return boolean Must be false when HBM is not supported or not activated, or
      * the operation failed while reading the status; true in any other case.
      */
     public static boolean isEnabled() {
-        try {
-            return Integer.parseInt(FileUtils.readOneLine(FILE_HBM)) > 0;
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
+        if (Integer.parseInt(FileUtils.readOneLine(FILE_HLM)) == 1) {
+            return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     /**
-     * This method allows to setup HBM
+     * This method allows to setup HLM
      *
-     * @param status The new HBM status
-     * @return boolean Must be false if HBM is not supported or the operation
+     * @param status The new HLM status
+     * @return boolean Must be false if HLM is not supported or the operation
      * failed; true in any other case.
      */
     public static boolean setEnabled(boolean status) {
-        return FileUtils.writeLine(FILE_HBM, status ? "1" : "0");
+        if (status == true) {
+            return FileUtils.writeLine(FILE_HLM, "1");
+        } else {
+            return FileUtils.writeLine(FILE_HLM, "0");
+        }
     }
 
     /**
