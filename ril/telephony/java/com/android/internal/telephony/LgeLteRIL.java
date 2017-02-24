@@ -30,6 +30,11 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.uicc.IccCardApplicationStatus;
 import com.android.internal.telephony.uicc.IccCardStatus;
 
+import com.android.internal.telephony.uicc.SimPhoneBookAdnRecord;
+
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Custom Qualcomm RIL for LG G5
  *
@@ -37,6 +42,14 @@ import com.android.internal.telephony.uicc.IccCardStatus;
  */
 public class LgeLteRIL extends RIL implements CommandsInterface {
     static final String LOG_TAG = "LgeLteRIL";
+
+    final int RIL_REQUEST_SIM_GET_ATR_LEGACY = 136;
+    final int RIL_REQUEST_CAF_SIM_OPEN_CHANNEL_WITH_P2_LEGACY = 137;
+    final int RIL_REQUEST_GET_ADN_RECORD_LEGACY = 138;
+    final int RIL_REQUEST_UPDATE_ADN_RECORD_LEGACY = 139;
+
+    final int RIL_UNSOL_RESPONSE_ADN_INIT_DONE_LEGACY = 1046;
+    final int RIL_UNSOL_RESPONSE_ADN_RECORDS_LEGACY = 1047;
 
     public static final int RIL_UNSOL_AVAILABLE_RAT = 1054;
     public static final int RIL_UNSOL_LOG_RF_BAND_INFO = 1165;
@@ -49,6 +62,87 @@ public class LgeLteRIL extends RIL implements CommandsInterface {
     public LgeLteRIL(Context context, int preferredNetworkType,
             int cdmaSubscription, Integer instanceId) {
         super(context, preferredNetworkType, cdmaSubscription, instanceId);
+    }
+
+    protected RILRequest processSolicited (Parcel p, int type) {
+	boolean found = false;
+        RILRequest rr = null;
+	int newRequest = 0;
+
+        int dataPosition = p.dataPosition(); // save off position within the Parcel
+	int serial = p.readInt();
+        int error = p.readInt();
+
+        // Pre-process the reply before popping it
+        synchronized (mRequestList) {
+            RILRequest tr = mRequestList.get(serial);
+            if (tr != null && tr.mSerial == serial) {
+                if (error == 0 || p.dataAvail() > 0) {
+                    try {
+			switch (tr.mRequest) {
+                        // Get those we're interested in
+                        case RIL_REQUEST_SIM_GET_ATR_LEGACY:
+			case RIL_REQUEST_CAF_SIM_OPEN_CHANNEL_WITH_P2_LEGACY:
+			case RIL_REQUEST_GET_ADN_RECORD_LEGACY:
+			case RIL_REQUEST_UPDATE_ADN_RECORD_LEGACY:
+                            rr = tr;
+                            break;
+			}
+		    } catch (Throwable thr) {
+                        // Exceptions here usually mean invalid RIL responses
+                        if (tr.mResult != null) {
+                            AsyncResult.forMessage(tr.mResult, null, thr);
+                            tr.mResult.sendToTarget();
+                        }
+                        return tr;
+                    }
+                }
+            }
+        }
+
+        if (rr == null) {
+            // Nothing we care about, go up
+            p.setDataPosition(dataPosition);
+            return super.processSolicited(p, type);
+        }
+
+	rr = findAndRemoveRequestFromList(serial);
+        if (rr == null) {
+            return rr;
+        }
+
+        Object ret = null;
+        if (error == 0 || p.dataAvail() > 0) {
+            switch (rr.mRequest) {
+	    case RIL_REQUEST_SIM_GET_ATR_LEGACY:
+		ret = responseString(p);
+                newRequest = RIL_REQUEST_SIM_GET_ATR;
+                break;
+	    case RIL_REQUEST_CAF_SIM_OPEN_CHANNEL_WITH_P2_LEGACY:
+		newRequest = RIL_REQUEST_CAF_SIM_OPEN_CHANNEL_WITH_P2;
+		ret = responseInts(p);
+		break;
+	    case RIL_REQUEST_GET_ADN_RECORD_LEGACY:
+		newRequest = RIL_REQUEST_GET_ADN_RECORD;
+		ret = responseInts(p);
+		break;
+	    case RIL_REQUEST_UPDATE_ADN_RECORD_LEGACY:
+		ret = responseInts(p);
+		newRequest = RIL_REQUEST_UPDATE_ADN_RECORD;
+		break;
+
+	    default:
+		throw new RuntimeException("Unrecognized solicited response: " + rr.mRequest);
+            }
+        }
+        if (RILJ_LOGD) riljLog(rr.serialString() + "< " + requestToString(rr.mRequest)
+                               + " " + retToString(rr.mRequest, ret));
+        if (rr.mResult != null) {
+            AsyncResult.forMessage(rr.mResult, ret, null);
+            rr.mResult.sendToTarget();
+        }
+
+        return rr;
     }
 
     static String
@@ -77,6 +171,12 @@ public class LgeLteRIL extends RIL implements CommandsInterface {
             case RIL_UNSOL_AVAILABLE_RAT: ret = responseInts(p); break;
             case RIL_UNSOL_LOG_RF_BAND_INFO: ret = responseInts(p); break;
             case RIL_UNSOL_LTE_REJECT_CAUSE: ret = responseInts(p); break;
+	    case RIL_UNSOL_RESPONSE_ADN_INIT_DONE_LEGACY:
+	        ret = responseVoid(p);
+	        break;
+	    case RIL_UNSOL_RESPONSE_ADN_RECORDS_LEGACY:
+	        ret = responseAdnRecords(p);
+	        break;
             default:
                 // Rewind the Parcel
                 p.setDataPosition(dataPosition);
@@ -95,6 +195,121 @@ public class LgeLteRIL extends RIL implements CommandsInterface {
             case RIL_UNSOL_LTE_REJECT_CAUSE:
                 if (RILJ_LOGD) lgeUnsljLogRet(response, ret);
                 break;
+        }
+
+    }
+
+    // below is a copy&paste from RIL class, replacing the RIL_REQUEST* with _LEGACY enums
+    private Object responseAdnRecords(Parcel p) {
+        int numRecords = p.readInt();
+        SimPhoneBookAdnRecord[] AdnRecordsInfoGroup = new SimPhoneBookAdnRecord[numRecords];
+
+        for (int i = 0 ; i < numRecords ; i++) {
+            AdnRecordsInfoGroup[i]= new SimPhoneBookAdnRecord();
+
+            AdnRecordsInfoGroup[i].mRecordIndex = p.readInt();
+            AdnRecordsInfoGroup[i].mAlphaTag = p.readString();
+            AdnRecordsInfoGroup[i].mNumber =
+                    SimPhoneBookAdnRecord.ConvertToPhoneNumber(p.readString());
+
+            int numEmails = p.readInt();
+            if(numEmails > 0) {
+                AdnRecordsInfoGroup[i].mEmailCount = numEmails;
+                AdnRecordsInfoGroup[i].mEmails = new String[numEmails];
+                for (int j = 0 ; j < numEmails; j++) {
+                    AdnRecordsInfoGroup[i].mEmails[j] = p.readString();
+                }
+            }
+
+            int numAnrs = p.readInt();
+            if(numAnrs > 0) {
+                AdnRecordsInfoGroup[i].mAdNumCount = numAnrs;
+                AdnRecordsInfoGroup[i].mAdNumbers = new String[numAnrs];
+                for (int k = 0 ; k < numAnrs; k++) {
+                    AdnRecordsInfoGroup[i].mAdNumbers[k] =
+                        SimPhoneBookAdnRecord.ConvertToPhoneNumber(p.readString());
+                }
+            }
+        }
+        riljLog(Arrays.toString(AdnRecordsInfoGroup));
+
+        return AdnRecordsInfoGroup;
+    }
+    
+    public void getAtr(Message response) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_SIM_GET_ATR_LEGACY, response);
+        int slotId = 0;
+        rr.mParcel.writeInt(1);
+        rr.mParcel.writeInt(slotId);
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> iccGetAtr: "
+                + requestToString(rr.mRequest) + " " + slotId);
+	
+        send(rr);
+    }
+    
+    public void iccOpenLogicalChannel(String AID, byte p2, Message response) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_CAF_SIM_OPEN_CHANNEL_WITH_P2_LEGACY, response);
+        rr.mParcel.writeByte(p2);
+        rr.mParcel.writeString(AID);
+
+        if (RILJ_LOGD)
+            riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        send(rr);
+    }
+    
+    public void getAdnRecord(Message result) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_GET_ADN_RECORD_LEGACY, result);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        send(rr);
+    }
+
+    public void updateAdnRecord(SimPhoneBookAdnRecord adnRecordInfo, Message result) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_UPDATE_ADN_RECORD_LEGACY, result);
+        rr.mParcel.writeInt(adnRecordInfo.getRecordIndex());
+        rr.mParcel.writeString(adnRecordInfo.getAlphaTag());
+        rr.mParcel.writeString(
+                SimPhoneBookAdnRecord.ConvertToRecordNumber(adnRecordInfo.getNumber()));
+
+        int numEmails = adnRecordInfo.getNumEmails();
+        rr.mParcel.writeInt(numEmails);
+        for (int i = 0 ; i < numEmails; i++) {
+            rr.mParcel.writeString(adnRecordInfo.getEmails()[i]);
+        }
+
+        int numAdNumbers = adnRecordInfo.getNumAdNumbers();
+        rr.mParcel.writeInt(numAdNumbers);
+        for (int j = 0 ; j < numAdNumbers; j++) {
+            rr.mParcel.writeString(
+                SimPhoneBookAdnRecord.ConvertToRecordNumber(adnRecordInfo.getAdNumbers()[j]));
+        }
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
+            + " with " + adnRecordInfo.toString());
+
+        send(rr);
+    }
+
+    // new ril methods that are not supported
+    public void setAllowedCarriers(List<CarrierIdentifier> carriers, Message response) {
+        riljLog("setAllowedCarriers: not supported");
+        if (response != null) {
+            CommandException ex = new CommandException(
+                CommandException.Error.REQUEST_NOT_SUPPORTED);
+            AsyncResult.forMessage(response, null, ex);
+            response.sendToTarget();
+        }
+    }
+
+    public void getAllowedCarriers(Message response) {
+        riljLog("getAllowedCarriers: not supported");
+        if (response != null) {
+            CommandException ex = new CommandException(
+                CommandException.Error.REQUEST_NOT_SUPPORTED);
+            AsyncResult.forMessage(response, null, ex);
+            response.sendToTarget();
         }
     }
 
