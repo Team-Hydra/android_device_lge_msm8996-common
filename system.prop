@@ -123,7 +123,7 @@ persist.data.df.agg.dl_pkt=10
 persist.data.df.agg.dl_size=4096
 persist.data.df.mux_count=8
 persist.data.df.iwlan_mux=9
-#ro.telephony.ril_class=LgeLteRIL
+ro.telephony.ril_class=LgeLteRIL
 
 # Radio - Data/RMNet
 persist.data.df.agg.dl_pkt=10
