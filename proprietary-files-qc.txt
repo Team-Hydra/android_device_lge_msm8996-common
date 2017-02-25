@@ -275,7 +275,7 @@ etc/permissions/telephonyservice.xml
 framework/qti-telephony-common.jar
 framework/QtiTelephonyServicelibrary.jar
 lib64/libparam.so
--priv-app/qcrilmsgtunnel/qcrilmsgtunnel.apk
+priv-app/qcrilmsgtunnel/qcrilmsgtunnel.apk
 vendor/bin/qti
 vendor/lib/libmdmdetect.so
 vendor/lib64/libconfigdb.so
