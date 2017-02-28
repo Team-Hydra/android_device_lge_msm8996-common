@@ -267,11 +267,11 @@ etc/permissions/embms.xml
 etc/permissions/qcnvitems.xml
 etc/permissions/qcrilhook.xml
 etc/permissions/telephonyservice.xml
--framework/embmslibrary.jar
--framework/qcrilhook.jar
--framework/qcnvitems.jar
-framework/qti-telephony-common.jar
-framework/QtiTelephonyServicelibrary.jar
+-framework/embmslibrary.jar:PRESIGNED
+-framework/qcrilhook.jar:PRESIGNED
+-framework/qcnvitems.jar;PRESIGNED
+-framework/qti-telephony-common.jar:PRESIGNED
+-framework/QtiTelephonyServicelibrary.jar:PRESIGNED
 lib64/libparam.so
 priv-app/qcrilmsgtunnel/qcrilmsgtunnel.apk
 vendor/bin/qti
