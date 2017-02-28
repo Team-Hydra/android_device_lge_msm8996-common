@@ -45,6 +45,9 @@ etc/cne/wqeclient/ATT/ATT_profile1.xml
 etc/cne/wqeclient/ATT/ATT_profile2.xml
 etc/cne/wqeclient/ATT/ATT_profile3.xml
 etc/cne/wqeclient/ATT/ATT_profile4.xml
+etc/cne/Nexus/ATT/ATT_profiles.xml
+etc/cne/Nexus/ROW/ROW_profiles.xml
+etc/cne/Nexus/VZW/VZW_profiles.xml
 etc/cne/wqeclient/profile1.xml
 etc/cne/wqeclient/profile2.xml
 etc/cne/wqeclient/profile3.xml
@@ -287,16 +290,21 @@ vendor/lib64/libsystem_health_mon.so
 vendor/qcril.db
 
 # Radio - IMS
+-app/ims/ims.apk
+-app/imssettings/imssettings.apk
+bin/ATFWD-daemon
 bin/ims_rtp_daemon
 bin/imscmservice
 bin/imsdatadaemon
 bin/imsqmidaemon
 etc/permissions/imscm.xml
 etc/permissions/qti-vzw-ims-internal.xml
-framework/imscmlibrary.jar
-framework/rcsimssettings.jar
 -vendor/app/ims/ims.apk
 -vendor/app/imssettings/imssettings.apk
+lib/libimscamera_jni.so
+lib64/libimscamera_jni.so
+lib/libimsmedia_jni.so
+lib64/libimsmedia_jni.so
 vendor/framework/qti-vzw-ims-internal.jar
 vendor/lib64/lib-dplmedia.so
 vendor/lib64/lib-ims-rcscmjni.so
