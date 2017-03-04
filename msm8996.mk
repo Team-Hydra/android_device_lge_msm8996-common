@@ -114,7 +114,8 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     cneapiclient \
     com.quicinc.cne \
-    services-ext
+    services-ext \
+    libcnefeatureconfig
 
 # Device init scripts
 PRODUCT_PACKAGES += \
