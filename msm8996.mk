@@ -171,7 +171,8 @@ PRODUCT_COPY_FILES += \
 
 # IMS
 PRODUCT_PACKAGES += \
-    libshims_ims
+    libshims_ims \
+    com.android.ims.rcsmanager
 
 # IPACM
 PRODUCT_PACKAGES += \
